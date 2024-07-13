@@ -5,6 +5,9 @@ from src.downloader.download import (
     download_all_workflows_and_actions,
     download_account_workflows_and_actions,
 )
+from src.downloader.local import (
+    download_local_repo_workflows_and_actions
+)
 from src.indexer.index import index_downloaded_workflows_and_actions
 from src.reporter.report import generate
 from src.config.config import (
@@ -25,6 +28,7 @@ from src.config.config import (
     DOWNLOAD_COMMAND,
     DOWNLOAD_ACCOUNT_COMMAND,
     DOWNLOAD_CRAWL_COMMAND,
+    DOWNLOAD_LOCAL_COMMAND,
     INDEX_COMMAND,
     REPORT_COMMAND,
     QUERIES_PATH_DEFAULT,
@@ -39,6 +43,7 @@ COMMAND_FUNCTIONS = {
     DOWNLOAD_COMMAND: {
         DOWNLOAD_CRAWL_COMMAND: download_all_workflows_and_actions,
         DOWNLOAD_ACCOUNT_COMMAND: download_account_workflows_and_actions,
+        DOWNLOAD_LOCAL_COMMAND: download_local_repo_workflows_and_actions,
     },
     INDEX_COMMAND: index_downloaded_workflows_and_actions,
     REPORT_COMMAND: generate,
@@ -163,6 +168,28 @@ def raven() -> None:
         action="store_const",
         const=True,
         help="Download repositories owned by the authenticated user",
+    )
+
+    local_download_parser = download_sub_parser.add_parser(
+        "local",
+        help="Scan local repository",
+        parents=[download_parser_options, redis_parser],
+    )
+
+    local_download_parser.add_argument(
+        "--path",
+        required=True,
+        action="append",
+        type=str,
+        help="Local path to repository"
+    )
+
+    local_download_parser.add_argument(
+        "--workflow",
+        required=False,
+        action="append",
+        type=str,
+        help="Workflow to scan"
     )
 
     crawl_download_parser.add_argument(
